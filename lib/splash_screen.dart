@@ -16,14 +16,14 @@ class _SplashScreenState extends State<SplashScreen> {
   void initState() {
     super.initState();
     // Navigate to Home after delay
-    Timer(const Duration(milliseconds: 2500), () {
+    Timer(const Duration(milliseconds: 3000), () {
       Navigator.of(context).pushReplacement(
         PageRouteBuilder(
-          pageBuilder: (_, __, ___) => const HomeScreen(),
-          transitionsBuilder: (_, animation, __, child) {
+          pageBuilder: (context, animation, secondaryAnimation) => const HomeScreen(),
+          transitionsBuilder: (context, animation, secondaryAnimation, child) {
             return FadeTransition(opacity: animation, child: child);
           },
-          transitionDuration: const Duration(milliseconds: 500),
+          transitionDuration: const Duration(milliseconds: 800),
         ),
       );
     });
@@ -36,117 +36,140 @@ class _SplashScreenState extends State<SplashScreen> {
         width: double.infinity,
         height: double.infinity,
         decoration: const BoxDecoration(
-          // Calm Islamic green and gold gradient
+          // Premium Islamic green and gold gradient
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
             colors: [
-              Color(0xFF1B5E3C), // Calm Islamic green
-              Color(0xFF2E7D52), // Mid green
-              Color(0xFF3D8B61), // Light green
-              Color(0xFF9C8442), // Soft gold transition
-              Color(0xFFB8973D), // Gentle gold
+              Color(0xFF003B39), // Darker, richer Green
+              Color(0xFF00554C), // Deep Emerald
+              Color(0xFFC5A028), // Elegant Gold
+              Color(0xFFD4AF37), // Metallic Gold
             ],
-            stops: [0.0, 0.3, 0.5, 0.75, 1.0],
+            stops: [0.0, 0.45, 0.8, 1.0],
           ),
         ),
         child: SafeArea(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Spacer(flex: 2),
+              const Spacer(flex: 3),
               
-              // Logo with soft glow - reasonable size
-              FadeIn(
-                duration: const Duration(milliseconds: 800),
-                child: Container(
-                  width: 150,
-                  height: 150,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    boxShadow: [
-                      BoxShadow(
-                        color: const Color(0xFFD4AF37).withOpacity(0.3),
-                        blurRadius: 40,
-                        spreadRadius: 10,
+              // Logo (Static to match Native Splash for seamless transition)
+              Container(
+                width: 140,
+                height: 140,
+                decoration: BoxDecoration(
+                  shape: BoxShape.rectangle,
+                  borderRadius: BorderRadius.circular(35),
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color(0xFFD4AF37).withValues(alpha: 0.4),
+                      blurRadius: 50,
+                      spreadRadius: 5,
+                    ),
+                  ],
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(35),
+                  child: Image.asset(
+                    'assets/logo.png',
+                    width: 140,
+                    height: 140,
+                    fit: BoxFit.contain,
+                  ),
+                ),
+              ),
+              
+              const SizedBox(height: 60),
+              
+              // Welcome message
+              FadeInUp(
+                delay: Duration.zero,
+                duration: const Duration(milliseconds: 500),
+                child: const Column(
+                  children: [
+                    Text(
+                      'مرحباً بكم',
+                      style: TextStyle(
+                        fontSize: 36,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                        fontFamily: 'Cairo', 
+                        letterSpacing: 1.2,
+                        shadows: [
+                          Shadow(
+                            blurRadius: 10.0,
+                            color: Colors.black38,
+                            offset: Offset(2.0, 2.0),
+                          ),
+                        ],
+                      ),
+                    ),
+                    SizedBox(height: 8),
+                    Text(
+                      'في تطبيق',
+                      style: TextStyle(
+                        fontSize: 18,
+                        color: Colors.white70,
+                        fontFamily: 'Cairo',
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              
+              const SizedBox(height: 15),
+              
+              // App name
+              FadeInUp(
+                delay: Duration.zero,
+                duration: const Duration(milliseconds: 500),
+                child: const Text(
+                  'المناسك العربي',
+                  style: TextStyle(
+                    fontSize: 32,
+                    fontWeight: FontWeight.w800,
+                    color: Color(0xFFFFD700), // Brighter Gold
+                    fontFamily: 'Cairo',
+                    letterSpacing: 1.5,
+                    shadows: [
+                       Shadow(
+                        blurRadius: 8.0,
+                        color: Colors.black45,
+                        offset: Offset(2.0, 2.0),
                       ),
                     ],
                   ),
-                  child: ClipOval(
-                    child: Image.asset(
-                      'assets/logo.png',
-                      width: 150,
-                      height: 150,
-                      fit: BoxFit.contain,
+                ),
+              ),
+              
+              const Spacer(flex: 4),
+              
+              // Bottom branding / Loading indicator
+              FadeIn(
+                delay: const Duration(milliseconds: 500),
+                child: Column(
+                  children: [
+                    const CircularProgressIndicator(
+                      color: Color(0xFFFFD700),
+                      strokeWidth: 2,
                     ),
-                  ),
+                    const SizedBox(height: 20),
+                    const Text(
+                      'Almanassik Alarabi',
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.white54,
+                        letterSpacing: 2.0,
+                        fontWeight: FontWeight.w300,
+                      ),
+                    ),
+                  ],
                 ),
               ),
               
               const SizedBox(height: 40),
-              
-              // Welcome message
-              FadeInUp(
-                delay: const Duration(milliseconds: 400),
-                duration: const Duration(milliseconds: 800),
-                child: const Text(
-                  'مرحباً بكم',
-                  style: TextStyle(
-                    fontSize: 32,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                    letterSpacing: 1,
-                  ),
-                ),
-              ),
-              
-              const SizedBox(height: 12),
-              
-              // App name
-              FadeInUp(
-                delay: const Duration(milliseconds: 600),
-                duration: const Duration(milliseconds: 800),
-                child: const Text(
-                  'المناسك العربي',
-                  style: TextStyle(
-                    fontSize: 26,
-                    fontWeight: FontWeight.w600,
-                    color: Color(0xFFFFE4A0), // Soft gold text
-                    letterSpacing: 1,
-                  ),
-                ),
-              ),
-              
-              const SizedBox(height: 10),
-              
-              // Subtitle
-              FadeInUp(
-                delay: const Duration(milliseconds: 800),
-                duration: const Duration(milliseconds: 800),
-                child: const Text(
-                  'دليلك لأمور الحج والعمرة',
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: Colors.white70,
-                  ),
-                ),
-              ),
-              
-              const Spacer(flex: 2),
-              
-              // Bottom branding
-              FadeIn(
-                delay: const Duration(milliseconds: 1200),
-                child: const Text(
-                  'Powered by Almanassik',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Colors.white38,
-                  ),
-                ),
-              ),
-              
-              const SizedBox(height: 30),
             ],
           ),
         ),

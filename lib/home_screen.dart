@@ -103,48 +103,202 @@ class _HomeScreenState extends State<HomeScreen> {
     controller.evaluateJavascript(source: js);
   }
 
+  bool _isLoading = true;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color(0xFF003B39), // Match splash background
       body: SafeArea(
-        child: InAppWebView(
-          key: webViewKey,
-          initialUrlRequest: URLRequest(
-            url: WebUri("https://www.almanassikalarabi.com/agencie/dashboard.html"),
-          ),
-          initialSettings: settings,
-          onWebViewCreated: (controller) {
-            webViewController = controller;
-            
-            // Register Handlers
-            controller.addJavaScriptHandler(handlerName: 'postMessage', callback: (args) {
-              _handlePostMessage(args[0]);
-            });
-            
-            controller.addJavaScriptHandler(handlerName: 'forceReLogin', callback: (args) {
-               _handleForceReLogin(args[0]);
-            });
-            
-            controller.addJavaScriptHandler(handlerName: 'testNotification', callback: (args) {
-               _handleTestNotification();
-            });
-          },
-          onLoadStart: (controller, url) {
-            _injectVariables(controller);
-            _injectPolyfills(controller);
-          },
-          onLoadStop: (controller, url) {
-            _injectVariables(controller);
-            _injectPolyfills(controller);
-          },
-          shouldOverrideUrlLoading: (controller, navigationAction) async {
-             return NavigationActionPolicy.ALLOW;
-          },
-          onConsoleMessage: (controller, consoleMessage) {
-            if (kDebugMode) {
-              print("WebView Console: \${consoleMessage.message}");
-            }
-          },
+        child: Stack(
+          children: [
+            // 1. The WebView (Bottom Layer)
+            InAppWebView(
+              key: webViewKey,
+              initialUrlRequest: URLRequest(
+                url: WebUri("https://www.almanassikalarabi.com/agencie/dashboard.html"),
+              ),
+              initialSettings: settings,
+              onWebViewCreated: (controller) {
+                webViewController = controller;
+                
+                // Register Handlers
+                controller.addJavaScriptHandler(handlerName: 'postMessage', callback: (args) {
+                  _handlePostMessage(args[0]);
+                });
+                
+                controller.addJavaScriptHandler(handlerName: 'forceReLogin', callback: (args) {
+                   _handleForceReLogin(args[0]);
+                });
+                
+                controller.addJavaScriptHandler(handlerName: 'testNotification', callback: (args) {
+                   _handleTestNotification();
+                });
+              },
+              onLoadStart: (controller, url) {
+                _injectVariables(controller);
+                _injectPolyfills(controller);
+              },
+              onLoadStop: (controller, url) async {
+                _injectVariables(controller);
+                _injectPolyfills(controller);
+                // Simple delay to ensure rendering has started before removing cover
+                await Future.delayed(const Duration(milliseconds: 500));
+                if (mounted) {
+                  setState(() {
+                    _isLoading = false;
+                  });
+                }
+              },
+              shouldOverrideUrlLoading: (controller, navigationAction) async {
+                 return NavigationActionPolicy.ALLOW;
+              },
+              onConsoleMessage: (controller, consoleMessage) {
+                if (kDebugMode) {
+                  print("WebView Console: ${consoleMessage.message}");
+                }
+              },
+            ),
+
+            // 2. The Loading Overlay (Top Layer) matches SplashScreen exactly
+            // We use AnimatedOpacity for a smooth fade-out effect.
+            IgnorePointer(
+              ignoring: !_isLoading, // Allow touches to pass through when not loading
+              child: AnimatedOpacity(
+                duration: const Duration(milliseconds: 800),
+                opacity: _isLoading ? 1.0 : 0.0,
+                curve: Curves.easeInOut,
+                child: Container(
+                  width: double.infinity,
+                  height: double.infinity,
+                  decoration: const BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        Color(0xFF003B39), 
+                        Color(0xFF00554C), 
+                        Color(0xFFC5A028), 
+                        Color(0xFFD4AF37), 
+                      ],
+                      stops: [0.0, 0.45, 0.8, 1.0],
+                    ),
+                  ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Spacer(flex: 3),
+                      
+                      // Static Logo (No entrances, just sits there)
+                      Container(
+                        width: 140,
+                        height: 140,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.rectangle,
+                          borderRadius: BorderRadius.circular(35),
+                          boxShadow: [
+                            BoxShadow(
+                              color: const Color(0xFFD4AF37).withValues(alpha: 0.4),
+                              blurRadius: 50,
+                              spreadRadius: 5,
+                            ),
+                          ],
+                        ),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(35),
+                          child: Image.asset(
+                            'assets/logo.png',
+                            width: 140,
+                            height: 140,
+                            fit: BoxFit.contain,
+                          ),
+                        ),
+                      ),
+                      
+                      const SizedBox(height: 60),
+                      
+                      // Static Welcome Message
+                      const Column(
+                        children: [
+                          Text(
+                            'مرحباً بكم',
+                            style: TextStyle(
+                              fontSize: 36,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                              fontFamily: 'Cairo', 
+                              letterSpacing: 1.2,
+                              shadows: [
+                                Shadow(
+                                  blurRadius: 10.0,
+                                  color: Colors.black38,
+                                  offset: Offset(2.0, 2.0),
+                                ),
+                              ],
+                            ),
+                          ),
+                          SizedBox(height: 8),
+                          Text(
+                            'في تطبيق',
+                            style: TextStyle(
+                              fontSize: 18,
+                              color: Colors.white70,
+                              fontFamily: 'Cairo',
+                            ),
+                          ),
+                        ],
+                      ),
+                      
+                      const SizedBox(height: 15),
+                      
+                      // Static App Name
+                      const Text(
+                        'المناسك العربي',
+                        style: TextStyle(
+                          fontSize: 32,
+                          fontWeight: FontWeight.w800,
+                          color: Color(0xFFFFD700), // Brighter Gold
+                          fontFamily: 'Cairo',
+                          letterSpacing: 1.5,
+                          shadows: [
+                             Shadow(
+                              blurRadius: 8.0,
+                              color: Colors.black45,
+                              offset: Offset(2.0, 2.0),
+                            ),
+                          ],
+                        ),
+                      ),
+                      
+                      const Spacer(flex: 4),
+                      
+                      // Static Loading Indicator
+                      Column(
+                        children: const [
+                          CircularProgressIndicator(
+                            color: Color(0xFFFFD700),
+                            strokeWidth: 2,
+                          ),
+                          SizedBox(height: 20),
+                          Text(
+                            'Almanassik Alarabi',
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Colors.white54,
+                              letterSpacing: 2.0,
+                              fontWeight: FontWeight.w300,
+                            ),
+                          ),
+                        ],
+                      ),
+                      
+                      const SizedBox(height: 40),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
